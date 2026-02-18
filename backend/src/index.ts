@@ -33,17 +33,12 @@ function buildData(c: any) {
         if (val) headers[name] = val
     }
 
-    // Security / bot data
+    // Security data (free-tier Cloudflare fields only)
     const security: Record<string, any> = {
         tlsVersion: cf.tlsVersion || 'Unknown',
         tlsCipher: cf.tlsCipher || 'Unknown',
         threatScore: cf.threatScore ?? 'N/A',
-        isBot: cf.botManagement?.score !== undefined
-            ? (cf.botManagement.score < 30 ? 'Likely Bot' : 'Human')
-            : 'N/A',
-        botScore: cf.botManagement?.score ?? 'N/A',
-        verifiedBot: cf.botManagement?.verified_bot ?? false,
-        jsDetection: cf.botManagement?.js_detection?.passed ?? 'N/A',
+        httpProtocol: cf.httpProtocol || 'HTTP/1.1',
     }
 
     return {

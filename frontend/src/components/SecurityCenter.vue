@@ -14,16 +14,10 @@ const getThreatLevel = (score) => {
   if (s < 25) return { label: 'Medium Risk', color: 'amber', icon: '△' }
   return { label: 'High Risk', color: 'red', icon: '✕' }
 }
-
-const getBotBadge = (status) => {
-  if (status === 'Human') return { color: 'emerald', icon: '✓' }
-  if (status === 'Likely Bot') return { color: 'red', icon: '⚠' }
-  return { color: 'slate', icon: '?' }
-}
 </script>
 
 <template>
-  <DetailCard title="Security & Bot" icon="🛡" :loading="loading">
+  <DetailCard title="Security" icon="🛡" :loading="loading">
     <div class="space-y-1">
       <!-- Threat Score - Featured -->
       <div class="mb-4 p-3 rounded-xl border" :class="{
@@ -58,24 +52,16 @@ const getBotBadge = (status) => {
 
       <div class="divide-y divide-white/[0.04]">
         <div class="flex justify-between items-center py-2.5">
-          <span class="text-[11px] text-slate-500 uppercase tracking-wider">Bot Detection</span>
-          <span class="text-[12px] px-2 py-0.5 rounded-full font-mono" :class="{
-            'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': getBotBadge(data.isBot).color === 'emerald',
-            'bg-red-500/10 text-red-400 border border-red-500/20': getBotBadge(data.isBot).color === 'red',
-            'bg-white/5 text-slate-400 border border-white/10': getBotBadge(data.isBot).color === 'slate',
-          }">{{ data.isBot || 'N/A' }}</span>
-        </div>
-        <div class="flex justify-between items-center py-2.5">
-          <span class="text-[11px] text-slate-500 uppercase tracking-wider">Bot Score</span>
-          <span class="text-[12px] text-slate-200 font-mono">{{ data.botScore ?? '—' }}/100</span>
-        </div>
-        <div class="flex justify-between items-center py-2.5">
           <span class="text-[11px] text-slate-500 uppercase tracking-wider">TLS Version</span>
           <span class="text-[12px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">{{ data.tlsVersion || '—' }}</span>
         </div>
         <div class="flex justify-between items-center py-2.5">
-          <span class="text-[11px] text-slate-500 uppercase tracking-wider">Verified Bot</span>
-          <span class="text-[12px] text-slate-200 font-mono">{{ data.verifiedBot ? 'Yes' : 'No' }}</span>
+          <span class="text-[11px] text-slate-500 uppercase tracking-wider">TLS Cipher</span>
+          <span class="text-[12px] text-slate-200 font-mono text-right max-w-[60%] truncate" :title="data.tlsCipher">{{ data.tlsCipher || '—' }}</span>
+        </div>
+        <div class="flex justify-between items-center py-2.5">
+          <span class="text-[11px] text-slate-500 uppercase tracking-wider">Protocol</span>
+          <span class="text-[12px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">{{ data.httpProtocol || '—' }}</span>
         </div>
       </div>
     </div>
