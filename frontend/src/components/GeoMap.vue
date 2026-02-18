@@ -32,6 +32,11 @@ const initMap = () => {
     zoomControl: false,
     attributionControl: false,
     scrollWheelZoom: false,
+    dragging: false,
+    touchZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    keyboard: false
   }).setView([lat, lng], props.lat ? 10 : 2)
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
