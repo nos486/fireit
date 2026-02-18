@@ -4,6 +4,7 @@ import NetworkIntelligence from './components/NetworkIntelligence.vue'
 import IdentityContext from './components/IdentityContext.vue'
 import ClientAnalytics from './components/ClientAnalytics.vue'
 import GeoMap from './components/GeoMap.vue'
+import TerminalHelp from './components/TerminalHelp.vue'
 
 const data = ref({ network: {}, identity: {}, client: {} })
 const loading = ref(true)
@@ -98,6 +99,9 @@ onMounted(fetchData)
         :timezone="data.identity.timezone"
         :loading="loading"
       />
+
+      <!-- Terminal Help -->
+      <TerminalHelp :apiUrl="API_URL" />
 
       <!-- Footer -->
       <div class="flex items-center justify-between pt-2 pb-4">

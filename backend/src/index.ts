@@ -10,54 +10,112 @@ const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('/*', cors())
 
-app.get('/', (c) => {
-    return c.text('Network Monitor API is running!')
-})
-
-app.get('/api/ip', async (c) => {
+// Helper: build the data object
+function buildData(c: any) {
     const ip = c.req.header('cf-connecting-ip') || 'Unknown'
     const country = c.req.header('cf-ipcountry') || 'Unknown'
     const userAgentString = c.req.header('user-agent') || 'Unknown'
-
-    // Parse User Agent
     const parser = new UAParser(userAgentString)
-    const uaResult = parser.getResult()
+    const ua = parser.getResult()
+    const cf = (c.req.raw as any).cf || {}
 
-    // Log to D1 asynchronously (fire and forget)
+    return {
+        ip,
+        userAgentString,
+        country,
+        network: {
+            ip,
+            isp: cf.asOrganization || 'Unknown ISP',
+            asn: cf.asn || 'Unknown ASN',
+            protocol: cf.httpProtocol || 'HTTP',
+        },
+        identity: {
+            country: cf.country || country,
+            city: cf.city || 'Unknown City',
+            region: cf.region || 'Unknown Region',
+            metroCode: cf.metroCode || 'N/A',
+            timezone: cf.timezone || 'UTC',
+            latitude: cf.latitude,
+            longitude: cf.longitude,
+            colo: cf.colo,
+        },
+        client: {
+            os: `${ua.os.name || 'Unknown'} ${ua.os.version || ''}`.trim(),
+            browser: `${ua.browser.name || 'Unknown'} ${ua.browser.version || ''}`.trim(),
+            engine: ua.engine.name || 'Unknown',
+            device: ua.device.type || 'Desktop',
+            userAgent: userAgentString,
+        }
+    }
+}
+
+// Helper: build pretty plain-text output
+function buildPlainText(d: ReturnType<typeof buildData>): string {
+    const line = (label: string, value: any) =>
+        `  ${label.padEnd(18)} ${value ?? '—'}\n`
+
+    return [
+        `\n🔥 FireIT — Network Intelligence\n`,
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`,
+        `\n  NETWORK\n`,
+        line('IP Address', d.network.ip),
+        line('ISP / Org', d.network.isp),
+        line('ASN', d.network.asn),
+        line('Protocol', d.network.protocol),
+        `\n  LOCATION\n`,
+        line('Country', d.identity.country),
+        line('City', d.identity.city),
+        line('Region', d.identity.region),
+        line('Timezone', d.identity.timezone),
+        line('Latitude', d.identity.latitude),
+        line('Longitude', d.identity.longitude),
+        line('Edge Node', d.identity.colo),
+        `\n  CLIENT\n`,
+        line('OS', d.client.os),
+        line('Browser', d.client.browser),
+        line('Engine', d.client.engine),
+        line('Device', d.client.device),
+        `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`,
+        `  Tip: curl https://fireit.pages.dev/api/ip | jq\n\n`,
+    ].join('')
+}
+
+app.get('/', (c) => {
+    return c.text('🔥 FireIT API — try: curl https://fireit.pages.dev/api/ip')
+})
+
+// JSON endpoint — also auto-detects curl and returns plain text
+app.get('/api/ip', async (c) => {
+    const d = buildData(c)
+
+    // Log to D1
     try {
         await c.env.DB.prepare(
             'INSERT INTO access_logs (ip, country, user_agent) VALUES (?, ?, ?)'
-        ).bind(ip, country, userAgentString).run()
+        ).bind(d.ip, d.country, d.userAgentString).run()
     } catch (e) {
         console.error('Failed to log to D1:', e)
     }
 
-    // Construct detailed response based on Cloudflare headers and UA parsing
-    return c.json({
-        network: {
-            ip,
-            isp: (c.req.raw as any).cf?.asOrganization || 'Unknown ISP', // CF exposes AS Organization often used as ISP proxy
-            asn: (c.req.raw as any).cf?.asn || 'Unknown ASN',
-            protocol: (c.req.raw as any).cf?.httpProtocol || 'HTTP', // Requires compatibility flag or might be inferred
-        },
-        identity: {
-            country: (c.req.raw as any).cf?.country || country,
-            city: (c.req.raw as any).cf?.city || 'Unknown City',
-            region: (c.req.raw as any).cf?.region || 'Unknown Region',
-            metroCode: (c.req.raw as any).cf?.metroCode || 'N/A',
-            timezone: (c.req.raw as any).cf?.timezone || 'UTC',
-            latitude: (c.req.raw as any).cf?.latitude,
-            longitude: (c.req.raw as any).cf?.longitude,
-            colo: (c.req.raw as any).cf?.colo, // Edge Node
-        },
-        client: {
-            os: `${uaResult.os.name || 'Unknown'} ${uaResult.os.version || ''}`.trim(),
-            browser: `${uaResult.browser.name || 'Unknown'} ${uaResult.browser.version || ''}`.trim(),
-            engine: `${uaResult.engine.name || 'Unknown'}`,
-            device: uaResult.device.type || 'Desktop',
-            userAgent: userAgentString
-        }
-    })
+    // If request comes from curl/wget/httpie → return pretty plain text
+    const ua = c.req.header('user-agent') || ''
+    if (/^(curl|wget|httpie|HTTPie|python-requests)/i.test(ua)) {
+        return c.text(buildPlainText(d))
+    }
+
+    return c.json({ network: d.network, identity: d.identity, client: d.client })
+})
+
+// Explicit plain-text endpoint (always returns text)
+app.get('/api/ip.txt', async (c) => {
+    const d = buildData(c)
+    return c.text(buildPlainText(d))
+})
+
+// JSON-only endpoint (always returns JSON, useful for scripts)
+app.get('/api/ip.json', async (c) => {
+    const d = buildData(c)
+    return c.json({ network: d.network, identity: d.identity, client: d.client })
 })
 
 export default app
