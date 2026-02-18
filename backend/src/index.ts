@@ -10,7 +10,7 @@ const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('/*', cors())
 
-// Helper: build the data object
+// Helper: build the data object for the connecting client
 function buildData(c: any) {
     const ip = c.req.header('cf-connecting-ip') || 'Unknown'
     const country = c.req.header('cf-ipcountry') || 'Unknown'
@@ -31,14 +31,6 @@ function buildData(c: any) {
     for (const name of headerNames) {
         const val = c.req.header(name)
         if (val) headers[name] = val
-    }
-
-    // Security data (free-tier Cloudflare fields only)
-    const security: Record<string, any> = {
-        tlsVersion: cf.tlsVersion || 'Unknown',
-        tlsCipher: cf.tlsCipher || 'Unknown',
-        threatScore: cf.threatScore ?? 'N/A',
-        httpProtocol: cf.httpProtocol || 'HTTP/1.1',
     }
 
     return {
@@ -69,7 +61,6 @@ function buildData(c: any) {
             userAgent: userAgentString,
         },
         headers,
-        security,
     }
 }
 
@@ -78,7 +69,7 @@ function buildPlainText(d: ReturnType<typeof buildData>): string {
     const line = (label: string, value: any) =>
         `  ${label.padEnd(18)} ${value ?? '—'}\n`
 
-    let text = [
+    return [
         `\n🔥 FireIT — Network Intelligence\n`,
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`,
         `\n  NETWORK\n`,
@@ -99,16 +90,9 @@ function buildPlainText(d: ReturnType<typeof buildData>): string {
         line('Browser', d.client.browser),
         line('Engine', d.client.engine),
         line('Device', d.client.device),
-        `\n  SECURITY\n`,
-        line('TLS Version', d.security.tlsVersion),
-        line('Threat Score', d.security.threatScore),
-        line('Bot Status', d.security.isBot),
-        line('Bot Score', d.security.botScore),
         `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`,
         `  Tip: curl https://fireit.pages.dev/api/ip | jq\n\n`,
     ].join('')
-
-    return text
 }
 
 app.get('/', (c) => {
@@ -118,6 +102,43 @@ app.get('/', (c) => {
 // Ping endpoint for latency measurement
 app.get('/api/ping', (c) => {
     return c.json({ pong: true, timestamp: Date.now() })
+})
+
+// IP Lookup endpoint — look up any IP using ip-api.com (free, no key)
+app.get('/api/lookup', async (c) => {
+    const ip = c.req.query('ip')
+    if (!ip) {
+        return c.json({ error: 'Missing ?ip= parameter' }, 400)
+    }
+    // Basic validation
+    if (!/^[\d.:a-fA-F]+$/.test(ip)) {
+        return c.json({ error: 'Invalid IP address' }, 400)
+    }
+
+    try {
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,asname,query`)
+        const data = await res.json() as any
+        if (data.status === 'fail') {
+            return c.json({ error: data.message || 'Lookup failed' }, 404)
+        }
+        return c.json({
+            ip: data.query,
+            country: data.country,
+            countryCode: data.countryCode,
+            region: data.regionName,
+            city: data.city,
+            zip: data.zip,
+            latitude: data.lat,
+            longitude: data.lon,
+            timezone: data.timezone,
+            isp: data.isp,
+            org: data.org,
+            as: data.as,
+            asName: data.asname,
+        })
+    } catch (e) {
+        return c.json({ error: 'Lookup service unavailable' }, 500)
+    }
 })
 
 // JSON endpoint — also auto-detects curl and returns plain text
@@ -144,7 +165,6 @@ app.get('/api/ip', async (c) => {
         identity: d.identity,
         client: d.client,
         headers: d.headers,
-        security: d.security,
     })
 })
 
@@ -162,7 +182,6 @@ app.get('/api/ip.json', async (c) => {
         identity: d.identity,
         client: d.client,
         headers: d.headers,
-        security: d.security,
     })
 })
 
