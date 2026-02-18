@@ -32,6 +32,7 @@ onUnmounted(() => {
         <div>
           <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Local Time</p>
           <p class="text-xl font-semibold text-slate-100 font-mono tracking-tight">{{ currentTime }}</p>
+          <p class="text-[10px] text-slate-500 mt-1 font-mono uppercase tracking-wider">{{ timezone || 'UTC' }}</p>
         </div>
         <div class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></div>
       </div>

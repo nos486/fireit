@@ -99,7 +99,7 @@ onMounted(fetchData)
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <NetworkIntelligence :data="data.network" :loading="loading" />
         <IdentityContext :data="data.identity" :loading="loading" />
-        <ClientAnalytics :data="data.client" :loading="loading" />
+        <ClientAnalytics :data="data.client" :timezone="data.identity.timezone" :loading="loading" />
       </div>
 
       <!-- Map -->
