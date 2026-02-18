@@ -8,11 +8,13 @@
     "start": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^3.0.0",
     "@cloudflare/workers-types": "^4.0.0",
-    "typescript": "^5.0.0"
+    "@types/ua-parser-js": "^0.7.39",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0"
   },
   "dependencies": {
-    "hono": "^4.0.0"
+    "hono": "^4.0.0",
+    "ua-parser-js": "^2.0.9"
   }
 }
