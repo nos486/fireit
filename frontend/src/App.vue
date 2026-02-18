@@ -9,6 +9,7 @@ import TerminalHelp from './components/TerminalHelp.vue'
 const data = ref({ network: {}, identity: {}, client: {} })
 const loading = ref(true)
 const error = ref(null)
+const showHelp = ref(false)
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
 
@@ -67,6 +68,17 @@ onMounted(fetchData)
           </svg>
           Refresh
         </button>
+
+        <!-- Help Button -->
+        <button
+          @click="showHelp = true"
+          class="flex items-center justify-center w-9 h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400 ml-2"
+          title="Terminal API Help"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
       </div>
     </nav>
 
@@ -100,9 +112,6 @@ onMounted(fetchData)
         :loading="loading"
       />
 
-      <!-- Terminal Help -->
-      <TerminalHelp :apiUrl="API_URL" />
-
       <!-- Footer -->
       <div class="flex items-center justify-between pt-2 pb-4">
         <p class="text-[11px] text-slate-600">FireIT — Network Intelligence Platform</p>
@@ -110,6 +119,25 @@ onMounted(fetchData)
       </div>
 
     </main>
+
+    <!-- Help Modal Overlay -->
+    <Transition name="fade">
+      <div v-if="showHelp" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#050608]/80 backdrop-blur-sm" @click.self="showHelp = false">
+        <div class="relative w-full max-w-2xl transform transition-all">
+          <!-- Close Button -->
+          <button
+            @click="showHelp = false"
+            class="absolute top-4 right-4 z-[110] p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <TerminalHelp :apiUrl="API_URL" />
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
