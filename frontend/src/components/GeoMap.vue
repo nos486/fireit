@@ -94,7 +94,7 @@ onMounted(() => {
 
     <!-- Loading Overlay -->
     <div v-if="loading" class="absolute inset-0 bg-[#0f1218]/80 z-[1001] flex items-center justify-center">
-      <span class="text-blue-500 font-mono animate-pulse">LOCATING SIGNAL...</span>
+      <span class="text-orange-500 font-mono animate-pulse">LOCATING SIGNAL...</span>
     </div>
   </div>
 </template>
@@ -108,11 +108,11 @@ onMounted(() => {
 .marker-pulse {
   width: 20px;
   height: 20px;
-  background: rgba(59, 130, 246, 0.5);
+  background: rgba(249, 115, 22, 0.5);
   border-radius: 50%;
   position: relative;
-  border: 2px solid #3b82f6;
-  box-shadow: 0 0 10px #3b82f6;
+  border: 2px solid #f97316;
+  box-shadow: 0 0 10px #f97316;
 }
 
 .marker-pulse::after {
@@ -124,7 +124,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 1px solid #3b82f6;
+  border: 1px solid #f97316;
   animation: pulse 2s infinite;
 }
 

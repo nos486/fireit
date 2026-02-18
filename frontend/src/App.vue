@@ -36,9 +36,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#050608] text-gray-300 font-sans p-4 md:p-8 flex flex-col justify-center">
+  <div class="min-h-screen bg-[#050608] text-gray-300 font-sans p-4 md:p-8 flex flex-col items-center">
     
-    <div v-if="error" class="max-w-7xl mx-auto w-full mb-4 bg-red-900/20 border border-red-500/50 p-4 text-red-500 font-mono text-center">
+    <!-- Branding Header -->
+    <header class="w-full max-w-7xl mx-auto mb-10 flex flex-col items-center justify-center text-center">
+      <div class="flex items-center gap-3 mb-2">
+        <!-- Fire Logo SVG -->
+        <svg class="w-10 h-10 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 3l-2.5 4.5h5L14 11zM6 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+        </svg>
+        <h1 class="text-4xl font-bold text-white tracking-tighter">FireIT</h1>
+      </div>
+      <p class="text-gray-500 uppercase tracking-[0.2em] text-xs font-semibold">Advanced Network & Identity</p>
+    </header>
+
+    <div v-if="error" class="max-w-7xl mx-auto w-full mb-4 bg-orange-900/10 border border-orange-500/50 p-4 text-orange-500 font-mono text-center">
       ⚠ {{ error }} ⚠
     </div>
 

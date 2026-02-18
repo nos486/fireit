@@ -14,7 +14,7 @@ defineProps({
   <DetailCard title="Network Intelligence" :loading="loading">
     <div class="flex justify-between items-center bg-gray-900/50 p-2 rounded">
       <span class="text-gray-500 text-xs font-mono uppercase">IP Address</span>
-      <span class="text-blue-400 font-mono text-sm">{{ data.ip }}</span>
+      <span class="text-orange-500 font-mono text-sm">{{ data.ip }}</span>
     </div>
     <div class="flex justify-between items-center p-2">
       <span class="text-gray-500 text-xs font-mono uppercase">ISP / Org</span>
