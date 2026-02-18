@@ -83,23 +83,40 @@ const getLatencyLabel = (ms) => {
   <DetailCard title="Latency Test" icon='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>' :loading="false">
     <div class="space-y-1">
       <!-- Featured latency display -->
-      <div class="mb-4 p-3  bg-white/[0.03] border border-white/[0.06]">
-        <div class="flex items-center justify-between mb-1">
-          <p class="text-[10px] text-slate-500 uppercase tracking-widest">Round Trip</p>
-          <span class="text-[10px] uppercase tracking-widest font-medium" :class="getLatencyColor(avgLatency)">
-            {{ getLatencyLabel(avgLatency) }}
-          </span>
-        </div>
-        <div class="flex items-baseline gap-1">
-          <span class="text-2xl font-bold font-mono" :class="getLatencyColor(avgLatency)">
-            {{ running ? '...' : (avgLatency ?? '—') }}
-          </span>
-          <span class="text-[10px] text-slate-600">ms avg</span>
-        </div>
-        <!-- Progress dots -->
-        <div class="flex gap-1.5 mt-3">
-          <div v-for="i in totalPings" :key="i" class="h-1 flex-1  transition-all duration-300"
-            :class="i <= pings.length ? getLatencyColor(pings[i-1]).replace('text-', 'bg-') + '/60' : 'bg-white/5'">
+      <div class="mb-6 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] relative overflow-hidden group">
+        <!-- Visual background glow -->
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+        <div class="relative z-10">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-medium">Network Latency</p>
+            <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/5 bg-white/5">
+              <div class="w-1.5 h-1.5 rounded-full" :class="getLatencyColor(avgLatency).replace('text-', 'bg-')"></div>
+              <span class="text-[9px] uppercase tracking-widest font-bold" :class="getLatencyColor(avgLatency)">
+                {{ getLatencyLabel(avgLatency) }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="flex items-baseline gap-2">
+            <span class="text-4xl font-bold font-mono tracking-tighter" :class="getLatencyColor(avgLatency)">
+              {{ running ? '...' : (avgLatency ?? '—') }}
+            </span>
+            <span class="text-xs text-slate-500 font-medium">ms <span class="text-[10px] opacity-60">avg</span></span>
+          </div>
+
+          <!-- Progress indicators -->
+          <div class="flex gap-2 mt-4">
+            <div v-for="i in totalPings" :key="i" 
+              class="h-1.5 flex-1 rounded-full transition-all duration-500 relative overflow-hidden"
+              :class="i <= pings.length ? 'bg-white/10' : 'bg-white/5'">
+              <div 
+                v-if="i <= pings.length"
+                class="absolute inset-0 transition-all duration-700 ease-out"
+                :class="getLatencyColor(pings[i-1]).replace('text-', 'bg-')"
+                :style="{ width: '100%' }"
+              ></div>
+            </div>
           </div>
         </div>
       </div>

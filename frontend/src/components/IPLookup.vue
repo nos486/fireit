@@ -73,14 +73,14 @@ const fields = [
         </div>
       </div>
 
-      <!-- Search Box -->
-      <form @submit.prevent="lookup" class="flex gap-2 mb-5">
+      <!-- Search Box (hidden if we have a result from navbar) -->
+      <form v-if="!result" @submit.prevent="lookup" class="flex gap-2 mb-5">
         <div class="flex-1 relative">
           <input
             v-model="query"
             type="text"
             placeholder="Enter IP address (e.g. 8.8.8.8)"
-            class="w-full bg-black/40 border border-white/[0.08] rounded-full px-4 py-2.5 text-sm text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-orange-500/40 focus:ring-4 focus:ring-orange-500/10 transition-all"
+            class="w-full bg-black/40 border border-white/[0.08] rounded-full px-4 py-2.5 text-sm text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-orange-500/40 focus:ring-4 focus:ring-orange-500/10 transition-all font-mono"
           />
         </div>
         <button

@@ -5,7 +5,6 @@ import IdentityContext from './components/IdentityContext.vue'
 import ClientAnalytics from './components/ClientAnalytics.vue'
 import GeoMap from './components/GeoMap.vue'
 import TerminalHelp from './components/TerminalHelp.vue'
-import HeadersInspector from './components/HeadersInspector.vue'
 import LatencyTest from './components/LatencyTest.vue'
 import PrivacyLeaks from './components/PrivacyLeaks.vue'
 import IPLookup from './components/IPLookup.vue'
@@ -159,11 +158,10 @@ onMounted(fetchData)
         :loading="loading"
       />
 
-      <!-- Row 2: Analysis (3 cards) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Row 2: Analysis (2 cards) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <LatencyTest :apiUrl="API_URL" />
         <PrivacyLeaks :serverIp="data.network.ip" />
-        <HeadersInspector :data="data.headers" :loading="loading" />
       </div>
 
       <!-- Footer -->
