@@ -95,7 +95,7 @@ onMounted(runAllTests)
 
 <template>
   <DetailCard title="Privacy Leaks" icon="🔓" :loading="false">
-    <div class="flex flex-col h-full">
+    <div class="flex flex-col h-full space-y-4">
       <div class="flex-1 space-y-4">
         <!-- WebRTC Section -->
         <div>
@@ -106,12 +106,12 @@ onMounted(runAllTests)
             <span v-else class="text-[10px] text-emerald-400 font-bold uppercase tracking-tight">✓ Secure</span>
           </div>
           
-          <div class="bg-black/20 p-2.5 min-h-[40px]">
+          <div class="bg-black/20 rounded-lg p-2.5 min-h-[40px]">
             <div v-if="localIps.length === 0 && !checkingWebRTC" class="text-[11px] text-slate-600 italic">No local IPs exposed</div>
             <div v-else class="space-y-1">
               <div v-for="ip in localIps" :key="ip" class="flex items-center justify-between">
                 <span class="text-[11px] font-mono" :class="ip === serverIp ? 'text-slate-400' : 'text-red-400'">{{ ip }}</span>
-                <span v-if="ip !== serverIp" class="text-[9px] px-1 bg-red-500/10 text-red-400 underline decoration-red-500/30">LEAK</span>
+                <span v-if="ip !== serverIp" class="text-[9px] px-1 bg-red-500/10 text-red-400 rounded">LEAK</span>
               </div>
             </div>
           </div>
@@ -126,23 +126,23 @@ onMounted(runAllTests)
             <span v-else class="text-[10px] text-emerald-400 font-bold uppercase tracking-tight">✓ Secure</span>
           </div>
           
-          <div class="bg-black/20 p-2.5 min-h-[40px]">
+          <div class="bg-black/20 rounded-lg p-2.5 min-h-[40px]">
             <div v-if="dnsIps.length === 0 && !checkingDNS" class="text-[11px] text-slate-600 italic">Could not detect DNS</div>
             <div v-else class="space-y-1">
               <div v-for="ip in dnsIps" :key="ip" class="flex items-center justify-between">
                 <span class="text-[11px] font-mono" :class="ip === serverIp ? 'text-slate-400' : 'text-amber-400'">{{ ip }}</span>
-                <span v-if="ip !== serverIp" class="text-[9px] px-1 bg-amber-500/10 text-amber-400 underline decoration-amber-500/30">RESOLVER</span>
+                <span v-if="ip !== serverIp" class="text-[9px] px-1 bg-amber-500/10 text-amber-400 rounded">RESOLVER</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Footer action - Absolute Bottom -->
+      <!-- Footer action -->
       <button
         @click="runAllTests"
         :disabled="checkingWebRTC || checkingDNS"
-        class="w-full mt-6 py-2 text-[10px] font-medium uppercase tracking-widest border border-orange-500/10 bg-orange-500/5 text-orange-400/80 hover:bg-orange-500/10 hover:border-orange-500/30 transition-all duration-200"
+        class="w-full py-2 rounded-lg text-[10px] font-medium uppercase tracking-widest border border-orange-500/10 bg-orange-500/5 text-orange-400/80 hover:bg-orange-500/10 hover:border-orange-500/30 transition-all duration-200"
       >
         Re-Test Leaks
       </button>
