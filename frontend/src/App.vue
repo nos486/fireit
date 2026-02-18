@@ -5,8 +5,12 @@ import IdentityContext from './components/IdentityContext.vue'
 import ClientAnalytics from './components/ClientAnalytics.vue'
 import GeoMap from './components/GeoMap.vue'
 import TerminalHelp from './components/TerminalHelp.vue'
+import HeadersInspector from './components/HeadersInspector.vue'
+import SecurityCenter from './components/SecurityCenter.vue'
+import LatencyTest from './components/LatencyTest.vue'
+import WebRTCLeak from './components/WebRTCLeak.vue'
 
-const data = ref({ network: {}, identity: {}, client: {} })
+const data = ref({ network: {}, identity: {}, client: {}, headers: {}, security: {} })
 const loading = ref(true)
 const error = ref(null)
 const showHelp = ref(false)
@@ -57,28 +61,31 @@ onMounted(fetchData)
         <!-- Subtitle -->
         <p class="hidden sm:block text-[11px] text-slate-500 uppercase tracking-[0.2em] font-medium">Advanced Network & Identity</p>
 
-        <!-- Refresh button -->
-        <button
-          @click="fetchData"
-          :disabled="loading"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium"
-        >
-          <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-          </svg>
-          Refresh
-        </button>
+        <!-- Right buttons -->
+        <div class="flex items-center gap-2">
+          <!-- Refresh button -->
+          <button
+            @click="fetchData"
+            :disabled="loading"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium"
+          >
+            <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Refresh
+          </button>
 
-        <!-- Help Button -->
-        <button
-          @click="showHelp = true"
-          class="flex items-center justify-center w-9 h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400 ml-2"
-          title="Terminal API Help"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </button>
+          <!-- Help Button -->
+          <button
+            @click="showHelp = true"
+            class="flex items-center justify-center w-9 h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400"
+            title="Terminal API Help"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+        </div>
       </div>
     </nav>
 
@@ -95,11 +102,11 @@ onMounted(fetchData)
         </div>
       </Transition>
 
-      <!-- Data cards -->
+      <!-- Row 1: Core Data (3 cards) -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <NetworkIntelligence :data="data.network" :loading="loading" />
         <IdentityContext :data="data.identity" :loading="loading" />
-        <ClientAnalytics :data="data.client" :timezone="data.identity.timezone" :loading="loading" />
+        <ClientAnalytics :data="data.client" :loading="loading" />
       </div>
 
       <!-- Map -->
@@ -111,6 +118,14 @@ onMounted(fetchData)
         :timezone="data.identity.timezone"
         :loading="loading"
       />
+
+      <!-- Row 2: Security & Analysis (4 cards) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <SecurityCenter :data="data.security" :loading="loading" />
+        <LatencyTest :apiUrl="API_URL" />
+        <WebRTCLeak :serverIp="data.network.ip" />
+        <HeadersInspector :data="data.headers" :loading="loading" />
+      </div>
 
       <!-- Footer -->
       <div class="flex items-center justify-between pt-2 pb-4">
@@ -145,4 +160,6 @@ onMounted(fetchData)
 .slide-down-enter-active, .slide-down-leave-active { transition: all 0.3s ease; }
 .slide-down-enter-from { opacity: 0; transform: translateY(-8px); }
 .slide-down-leave-to { opacity: 0; transform: translateY(-8px); }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

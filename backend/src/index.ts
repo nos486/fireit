@@ -19,6 +19,33 @@ function buildData(c: any) {
     const ua = parser.getResult()
     const cf = (c.req.raw as any).cf || {}
 
+    // Collect interesting request headers
+    const headerNames = [
+        'accept-language', 'accept-encoding', 'accept',
+        'dnt', 'sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform',
+        'sec-fetch-dest', 'sec-fetch-mode', 'sec-fetch-site',
+        'upgrade-insecure-requests', 'cache-control', 'pragma',
+        'connection', 'x-forwarded-for', 'x-real-ip'
+    ]
+    const headers: Record<string, string> = {}
+    for (const name of headerNames) {
+        const val = c.req.header(name)
+        if (val) headers[name] = val
+    }
+
+    // Security / bot data
+    const security: Record<string, any> = {
+        tlsVersion: cf.tlsVersion || 'Unknown',
+        tlsCipher: cf.tlsCipher || 'Unknown',
+        threatScore: cf.threatScore ?? 'N/A',
+        isBot: cf.botManagement?.score !== undefined
+            ? (cf.botManagement.score < 30 ? 'Likely Bot' : 'Human')
+            : 'N/A',
+        botScore: cf.botManagement?.score ?? 'N/A',
+        verifiedBot: cf.botManagement?.verified_bot ?? false,
+        jsDetection: cf.botManagement?.js_detection?.passed ?? 'N/A',
+    }
+
     return {
         ip,
         userAgentString,
@@ -45,7 +72,9 @@ function buildData(c: any) {
             engine: ua.engine.name || 'Unknown',
             device: ua.device.type || 'Desktop',
             userAgent: userAgentString,
-        }
+        },
+        headers,
+        security,
     }
 }
 
@@ -54,7 +83,7 @@ function buildPlainText(d: ReturnType<typeof buildData>): string {
     const line = (label: string, value: any) =>
         `  ${label.padEnd(18)} ${value ?? '—'}\n`
 
-    return [
+    let text = [
         `\n🔥 FireIT — Network Intelligence\n`,
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`,
         `\n  NETWORK\n`,
@@ -75,13 +104,25 @@ function buildPlainText(d: ReturnType<typeof buildData>): string {
         line('Browser', d.client.browser),
         line('Engine', d.client.engine),
         line('Device', d.client.device),
+        `\n  SECURITY\n`,
+        line('TLS Version', d.security.tlsVersion),
+        line('Threat Score', d.security.threatScore),
+        line('Bot Status', d.security.isBot),
+        line('Bot Score', d.security.botScore),
         `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`,
         `  Tip: curl https://fireit.pages.dev/api/ip | jq\n\n`,
     ].join('')
+
+    return text
 }
 
 app.get('/', (c) => {
     return c.text('🔥 FireIT API — try: curl https://fireit.pages.dev/api/ip')
+})
+
+// Ping endpoint for latency measurement
+app.get('/api/ping', (c) => {
+    return c.json({ pong: true, timestamp: Date.now() })
 })
 
 // JSON endpoint — also auto-detects curl and returns plain text
@@ -103,7 +144,13 @@ app.get('/api/ip', async (c) => {
         return c.text(buildPlainText(d))
     }
 
-    return c.json({ network: d.network, identity: d.identity, client: d.client })
+    return c.json({
+        network: d.network,
+        identity: d.identity,
+        client: d.client,
+        headers: d.headers,
+        security: d.security,
+    })
 })
 
 // Explicit plain-text endpoint (always returns text)
@@ -115,7 +162,13 @@ app.get('/api/ip.txt', async (c) => {
 // JSON-only endpoint (always returns JSON, useful for scripts)
 app.get('/api/ip.json', async (c) => {
     const d = buildData(c)
-    return c.json({ network: d.network, identity: d.identity, client: d.client })
+    return c.json({
+        network: d.network,
+        identity: d.identity,
+        client: d.client,
+        headers: d.headers,
+        security: d.security,
+    })
 })
 
 export default app
