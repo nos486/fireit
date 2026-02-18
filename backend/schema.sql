@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS access_logs;
+CREATE TABLE access_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ip TEXT,
+  country TEXT,
+  user_agent TEXT,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
