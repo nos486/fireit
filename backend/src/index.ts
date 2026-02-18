@@ -102,13 +102,15 @@ app.get('/', (c) => {
 // Ping endpoint for latency measurement - also handle logging here
 app.get('/api/ping', async (c) => {
     const d = buildData(c)
-    // Log to D1 only when user pings
-    try {
-        await c.env.DB.prepare(
-            'INSERT INTO access_logs (ip, country, user_agent) VALUES (?, ?, ?)'
-        ).bind(d.ip, d.country, d.userAgentString).run()
-    } catch (e) {
-        console.error('Failed to log to D1:', e)
+    // Log to D1 only when user pings with ?log=true
+    if (c.req.query('log') === 'true') {
+        try {
+            await c.env.DB.prepare(
+                'INSERT INTO access_logs (ip, country, user_agent) VALUES (?, ?, ?)'
+            ).bind(d.ip, d.country, d.userAgentString).run()
+        } catch (e) {
+            console.error('Failed to log to D1:', e)
+        }
     }
     return c.json({ pong: true, timestamp: Date.now() })
 })

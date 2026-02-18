@@ -7,18 +7,21 @@ const props = defineProps({
 })
 
 const localIps = ref([])
-const leakDetected = ref(false)
-const checking = ref(true)
+const dnsIps = ref([])
+const webrtcLeakDetected = ref(false)
+const dnsLeakDetected = ref(false)
+const checkingWebRTC = ref(true)
+const checkingDNS = ref(true)
 const supported = ref(true)
 
 const checkWebRTC = async () => {
-  checking.value = true
+  checkingWebRTC.value = true
   localIps.value = []
-  leakDetected.value = false
+  webrtcLeakDetected.value = false
 
   if (!window.RTCPeerConnection) {
     supported.value = false
-    checking.value = false
+    checkingWebRTC.value = false
     return
   }
 
@@ -50,76 +53,96 @@ const checkWebRTC = async () => {
     })
 
     pc.close()
-
     localIps.value = Array.from(ips)
     
-    // Check if any detected IP differs from the server-reported IP
     if (localIps.value.length > 0 && props.serverIp) {
-      leakDetected.value = localIps.value.some(ip => ip !== props.serverIp)
+      webrtcLeakDetected.value = localIps.value.some(ip => ip !== props.serverIp)
     }
   } catch (e) {
     console.error('WebRTC check failed:', e)
   }
-
-  checking.value = false
+  checkingWebRTC.value = false
 }
 
-onMounted(checkWebRTC)
+const checkDNS = async () => {
+  checkingDNS.value = true
+  dnsIps.value = []
+  dnsLeakDetected.value = false
+
+  try {
+    const res = await fetch('https://edns.ip-api.com/json')
+    const data = await res.json()
+    if (data.dns && data.dns.ip) {
+      const ip = data.dns.ip
+      dnsIps.value = [ip]
+      if (props.serverIp && ip !== props.serverIp) {
+        dnsLeakDetected.value = true
+      }
+    }
+  } catch (e) {
+    console.error('DNS leak check failed:', e)
+  }
+  checkingDNS.value = false
+}
+
+const runAllTests = () => {
+  checkWebRTC()
+  checkDNS()
+}
+
+onMounted(runAllTests)
 </script>
 
 <template>
-  <DetailCard title="WebRTC Leak Test" icon="🔓" :loading="false">
-    <div class="space-y-1">
-      <!-- Status Banner -->
-      <div class="mb-4 p-3 rounded-xl border" :class="
-        checking
-          ? 'bg-white/[0.03] border-white/[0.06]'
-          : !supported
-            ? 'bg-slate-500/5 border-slate-500/20'
-            : leakDetected
-              ? 'bg-red-500/5 border-red-500/20'
-              : localIps.length === 0
-                ? 'bg-emerald-500/5 border-emerald-500/20'
-                : 'bg-amber-500/5 border-amber-500/20'
-      ">
-        <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Status</p>
-        <p v-if="checking" class="text-sm text-slate-400 font-medium animate-pulse">Checking WebRTC...</p>
-        <p v-else-if="!supported" class="text-sm text-slate-400 font-medium">WebRTC Not Supported</p>
-        <p v-else-if="localIps.length === 0" class="text-sm text-emerald-400 font-medium">✓ No Leak Detected</p>
-        <p v-else-if="leakDetected" class="text-sm text-red-400 font-medium">⚠ IP Leak Detected!</p>
-        <p v-else class="text-sm text-amber-400 font-medium">△ IPs Exposed (Same as Public)</p>
-      </div>
-
-      <!-- Server IP -->
-      <div class="flex justify-between items-center py-2.5 border-b border-white/[0.04]">
-        <span class="text-[11px] text-slate-500 uppercase tracking-wider">Server IP</span>
-        <span class="text-[12px] text-orange-400 font-mono">{{ serverIp || '—' }}</span>
-      </div>
-
-      <!-- Detected IPs -->
-      <div class="py-2.5">
-        <p class="text-[11px] text-slate-500 uppercase tracking-wider mb-2">WebRTC IPs</p>
-        <div v-if="checking" class="shimmer h-3 w-3/4"></div>
-        <div v-else-if="localIps.length === 0" class="text-[11px] text-slate-600 font-mono">None found — protected</div>
-        <div v-else class="space-y-1.5">
-          <div v-for="ip in localIps" :key="ip" class="flex items-center gap-2">
-            <span class="w-1.5 h-1.5 rounded-full" :class="ip === serverIp ? 'bg-amber-400' : 'bg-red-400'"></span>
-            <span class="text-[12px] font-mono" :class="ip === serverIp ? 'text-amber-300' : 'text-red-300'">{{ ip }}</span>
-            <span v-if="ip !== serverIp" class="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">LEAKED</span>
+  <DetailCard title="Privacy Leaks" icon="🔓" :loading="false">
+    <div class="space-y-4">
+      <!-- WebRTC Section -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] text-slate-500 uppercase tracking-wider">WebRTC Leak</span>
+          <span v-if="checkingWebRTC" class="text-[10px] text-slate-500 animate-pulse">Checking...</span>
+          <span v-else-if="webrtcLeakDetected" class="text-[10px] text-red-400 font-bold uppercase tracking-tight">⚠ Leak Detected</span>
+          <span v-else class="text-[10px] text-emerald-400 font-bold uppercase tracking-tight">✓ Secure</span>
+        </div>
+        
+        <div class="bg-black/20 rounded-lg p-2.5 min-h-[40px]">
+          <div v-if="localIps.length === 0 && !checkingWebRTC" class="text-[11px] text-slate-600 italic">No local IPs exposed</div>
+          <div v-else class="space-y-1">
+            <div v-for="ip in localIps" :key="ip" class="flex items-center justify-between">
+              <span class="text-[11px] font-mono" :class="ip === serverIp ? 'text-slate-400' : 'text-red-400'">{{ ip }}</span>
+              <span v-if="ip !== serverIp" class="text-[9px] px-1 bg-red-500/10 text-red-400 rounded">LEAK</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Re-check -->
+      <!-- DNS Section -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] text-slate-500 uppercase tracking-wider">DNS Leak</span>
+          <span v-if="checkingDNS" class="text-[10px] text-slate-500 animate-pulse">Checking...</span>
+          <span v-else-if="dnsLeakDetected" class="text-[10px] text-amber-400 font-bold uppercase tracking-tight">△ DNS Exposed</span>
+          <span v-else class="text-[10px] text-emerald-400 font-bold uppercase tracking-tight">✓ Secure</span>
+        </div>
+        
+        <div class="bg-black/20 rounded-lg p-2.5 min-h-[40px]">
+          <div v-if="dnsIps.length === 0 && !checkingDNS" class="text-[11px] text-slate-600 italic">Could not detect DNS</div>
+          <div v-else class="space-y-1">
+            <div v-for="ip in dnsIps" :key="ip" class="flex items-center justify-between">
+              <span class="text-[11px] font-mono" :class="ip === serverIp ? 'text-slate-400' : 'text-amber-400'">{{ ip }}</span>
+              <span v-if="ip !== serverIp" class="text-[9px] px-1 bg-amber-500/10 text-amber-400 rounded">RESOLVER</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer action -->
       <button
-        @click="checkWebRTC"
-        :disabled="checking"
-        class="w-full mt-2 py-2 rounded-lg text-[11px] font-medium uppercase tracking-wider border transition-all duration-200"
-        :class="checking
-          ? 'border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed'
-          : 'border-orange-500/20 bg-orange-500/5 text-orange-400 hover:bg-orange-500/10 hover:border-orange-500/30'"
+        @click="runAllTests"
+        :disabled="checkingWebRTC || checkingDNS"
+        class="w-full py-2 rounded-lg text-[10px] font-medium uppercase tracking-widest border border-orange-500/10 bg-orange-500/5 text-orange-400/80 hover:bg-orange-500/10 hover:border-orange-500/30 transition-all duration-200"
       >
-        {{ checking ? 'Checking...' : 'Re-Check' }}
+        Re-Test Leaks
       </button>
     </div>
   </DetailCard>

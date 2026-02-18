@@ -15,10 +15,11 @@ const running = ref(false)
 const pings = ref([])
 const totalPings = 3
 
-const ping = async () => {
+const ping = async (log = false) => {
   const start = performance.now()
   try {
-    await fetch(`${props.apiUrl}/api/ping`, { cache: 'no-store' })
+    const url = log ? `${props.apiUrl}/api/ping?log=true` : `${props.apiUrl}/api/ping`
+    await fetch(url, { cache: 'no-store' })
     const end = performance.now()
     return Math.round(end - start)
   } catch {
@@ -36,7 +37,7 @@ const runTest = async () => {
   jitter.value = null
 
   for (let i = 0; i < totalPings; i++) {
-    const ms = await ping()
+    const ms = await ping(i === 0) // Log only on first ping
     if (ms >= 0) {
       pings.value.push(ms)
       latency.value = ms
