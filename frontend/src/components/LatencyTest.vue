@@ -80,7 +80,7 @@ const getLatencyLabel = (ms) => {
 </script>
 
 <template>
-  <DetailCard title="Latency Test" icon="⚡" :loading="false">
+  <DetailCard title="Latency Test" icon='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>' :loading="false">
     <div class="space-y-1">
       <!-- Featured latency display -->
       <div class="mb-4 p-3  bg-white/[0.03] border border-white/[0.06]">

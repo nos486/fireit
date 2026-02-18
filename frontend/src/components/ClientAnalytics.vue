@@ -25,7 +25,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <DetailCard title="Client Analytics" icon="◈" :loading="loading">
+  <DetailCard title="Client Analytics" icon='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>' :loading="loading">
     <div class="space-y-1">
       <!-- Live clock -->
       <div class="mb-5 p-3  bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
