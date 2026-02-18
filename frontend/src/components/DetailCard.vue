@@ -13,7 +13,7 @@ defineProps({
     
     <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-      <div class="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+      <div class="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
         <span class="text-orange-400 text-base leading-none" v-html="icon"></span>
       </div>
       <h2 class="text-xs font-semibold text-slate-400 tracking-widest uppercase">{{ title }}</h2>

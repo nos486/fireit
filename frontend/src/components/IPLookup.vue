@@ -2,13 +2,23 @@
 import { ref } from 'vue'
 
 const props = defineProps({
-  apiUrl: { type: String, default: 'http://localhost:8787' }
+  apiUrl: { type: String, default: 'http://localhost:8787' },
+  initialResult: { type: Object, default: null }
 })
 
 const query = ref('')
-const result = ref(null)
+const result = ref(props.initialResult)
 const loading = ref(false)
 const error = ref(null)
+
+// Watch for prop changes to update result in modal
+import { watch } from 'vue'
+watch(() => props.initialResult, (newVal) => {
+  if (newVal) {
+    result.value = newVal
+    query.value = newVal.ip || ''
+  }
+})
 
 const lookup = async () => {
   const ip = query.value.trim()
@@ -49,12 +59,12 @@ const fields = [
 </script>
 
 <template>
-  <div class="bg-white/[0.03] border border-white/[0.07]  overflow-hidden">
+  <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden backdrop-blur-md">
     <div class="h-px bg-gradient-to-r from-transparent via-orange-500/40 to-transparent"></div>
     <div class="p-6">
-      <!-- Header -->
-      <div class="flex items-center gap-3 mb-5">
-        <div class="w-8 h-8  bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+      <!-- Header (Optional/Hidden if in modal search result mode?) -->
+      <div v-if="!result" class="flex items-center gap-3 mb-5">
+        <div class="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
           <span class="text-orange-400 text-sm">🔍</span>
         </div>
         <div>
@@ -70,13 +80,13 @@ const fields = [
             v-model="query"
             type="text"
             placeholder="Enter IP address (e.g. 8.8.8.8)"
-            class="w-full bg-black/40 border border-white/[0.08]  px-4 py-2.5 text-sm text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-orange-500/40 focus:ring-1 focus:ring-orange-500/20 transition-all"
+            class="w-full bg-black/40 border border-white/[0.08] rounded-full px-4 py-2.5 text-sm text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-orange-500/40 focus:ring-4 focus:ring-orange-500/10 transition-all"
           />
         </div>
         <button
           type="submit"
           :disabled="loading || !query.trim()"
-          class="px-5 py-2.5  text-xs font-semibold uppercase tracking-wider transition-all duration-200 flex items-center gap-2"
+          class="px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-200 flex items-center gap-2"
           :class="loading || !query.trim()
             ? 'bg-white/5 text-slate-600 border border-white/5 cursor-not-allowed'
             : 'bg-orange-500 text-white hover:bg-orange-600 shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_24px_rgba(249,115,22,0.4)]'"

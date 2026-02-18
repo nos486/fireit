@@ -58,7 +58,7 @@ onMounted(initMap)
 </script>
 
 <template>
-  <div class="relative w-full  overflow-hidden border border-white/[0.07] bg-[#0a0b0f]" style="height: 380px;">
+  <div class="relative w-full rounded-2xl overflow-hidden border border-white/[0.07] bg-[#0a0b0f]" style="height: 380px;">
     <!-- Top accent line -->
     <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/40 to-transparent z-[1001]"></div>
 

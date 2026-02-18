@@ -15,6 +15,26 @@ const loading = ref(true)
 const error = ref(null)
 const showHelp = ref(false)
 const showLookup = ref(false)
+const navbarSearchQuery = ref('')
+const navbarLookupResult = ref(null)
+const searching = ref(false)
+
+const handleNavbarSearch = async () => {
+  const ip = navbarSearchQuery.value.trim()
+  if (!ip) return
+  
+  searching.value = true
+  try {
+    const res = await fetch(`${API_URL}/api/lookup?ip=${encodeURIComponent(ip)}`)
+    const data = await res.json()
+    navbarLookupResult.value = data
+    showLookup.value = true
+  } catch (err) {
+    console.error('Search failed:', err)
+  } finally {
+    searching.value = false
+  }
+}
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
 
@@ -45,41 +65,49 @@ onMounted(fetchData)
     </div>
 
     <!-- Navbar -->
-    <nav class="relative z-10 border-b border-white/[0.06] bg-black/20 backdrop-blur-xl">
-      <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+    <nav class="relative z-50 h-20 flex items-center transition-all duration-300">
+      <div class="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
         <!-- Logo -->
-        <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7  bg-orange-500 flex items-center justify-center shadow-[0_0_16px_rgba(249,115,22,0.5)]">
-            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-orange-500 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.4)] rounded-lg">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32-2.59 2.08-3.61 5.75-2.39 8.9.04.1.08.2.08.33 0 .22-.15.42-.35.5-.23.1-.47.04-.66-.12a.58.58 0 0 1-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 10 4.87 12.3 5 14.47c.06.5.12 1 .29 1.5.14.6.41 1.2.71 1.73 1.08 1.73 2.95 2.97 4.96 3.22 2.14.27 4.43-.12 6.07-1.6 1.83-1.66 2.47-4.32 1.53-6.6l-.13-.26c-.21-.46-.77-1.26-.77-1.26m-3.16 6.3c-.28.24-.74.5-1.1.6-1.12.4-2.24-.16-2.9-.82 1.19-.28 1.9-1.16 2.11-2.05.17-.8-.15-1.46-.28-2.23-.12-.74-.1-1.37.17-2.06.19.38.39.76.63 1.06.77 1 1.98 1.44 2.24 2.8.04.14.06.28.06.43.03.82-.32 1.72-.93 2.27z"/>
             </svg>
           </div>
-          <div>
-            <span class="text-sm font-bold text-white tracking-tight">FireIT</span>
+          <div class="hidden sm:block">
+            <span class="text-base font-bold text-white tracking-tight block">FireIT</span>
+            <span class="text-[9px] text-slate-500 uppercase tracking-[0.2em] font-medium leading-none">Intelligence</span>
           </div>
         </div>
 
-        <!-- Subtitle -->
-        <p class="hidden sm:block text-[11px] text-slate-500 uppercase tracking-[0.2em] font-medium">Advanced Network & Identity</p>
+        <!-- Inline Search -->
+        <div class="flex-1 max-w-md mx-8">
+          <div class="relative group">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-orange-500 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              v-model="navbarSearchQuery"
+              @keyup.enter="handleNavbarSearch"
+              type="text"
+              placeholder="Locate any IP Address..."
+              class="w-full bg-white/[0.04] border border-white/[0.08] rounded-full py-2 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-orange-500/40 focus:ring-4 focus:ring-orange-500/10 transition-all font-mono"
+            />
+            <div v-if="searching" class="absolute inset-y-0 right-3 flex items-center">
+              <div class="w-3.5 h-3.5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"></div>
+            </div>
+          </div>
+        </div>
 
         <!-- Right buttons -->
         <div class="flex items-center gap-2">
-          <!-- IP Lookup Button -->
-          <button
-            @click="showLookup = true"
-            class="flex items-center justify-center w-9 h-9  border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400"
-            title="IP Lookup"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
-
           <!-- Refresh button -->
           <button
             @click="fetchData"
             :disabled="loading"
-            class="flex items-center justify-center w-9 h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400 disabled:opacity-40 disabled:cursor-not-allowed"
+            class="flex items-center justify-center w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400 disabled:opacity-40 disabled:cursor-not-allowed"
             title="Refresh Data"
           >
             <svg class="w-4 h-4" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,10 +118,10 @@ onMounted(fetchData)
           <!-- Help Button -->
           <button
             @click="showHelp = true"
-            class="flex items-center justify-center w-9 h-9  border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400"
+            class="flex items-center justify-center w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400"
             title="Terminal API Help"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </button>
@@ -179,7 +207,7 @@ onMounted(fetchData)
             </svg>
           </button>
 
-          <IPLookup :apiUrl="API_URL" />
+          <IPLookup :apiUrl="API_URL" :initialResult="navbarLookupResult" />
         </div>
       </div>
     </Transition>
