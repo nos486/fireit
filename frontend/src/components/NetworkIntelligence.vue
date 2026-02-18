@@ -11,7 +11,7 @@ defineProps({
   <DetailCard title="Network Intelligence" icon="⬡" :loading="loading">
     <div class="space-y-1">
       <!-- IP Address - Featured -->
-      <div class="mb-5 p-3 rounded-xl bg-orange-500/8 border border-orange-500/15">
+      <div class="mb-5 p-3  bg-orange-500/8 border border-orange-500/15">
         <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-1 font-medium">IP Address</p>
         <p class="text-xl font-semibold text-orange-400 font-mono tracking-tight">{{ data.ip || '—' }}</p>
       </div>
@@ -27,7 +27,7 @@ defineProps({
         </div>
         <div class="flex justify-between items-center py-2.5">
           <span class="text-[11px] text-slate-500 uppercase tracking-wider">Protocol</span>
-          <span class="text-[12px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">{{ data.protocol || 'HTTP' }}</span>
+          <span class="text-[12px] px-2 py-0.5  bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">{{ data.protocol || 'HTTP' }}</span>
         </div>
       </div>
     </div>

@@ -11,7 +11,7 @@ defineProps({
   <DetailCard title="Identity Context" icon="◎" :loading="loading">
     <div class="space-y-1">
       <!-- Country + City - Featured -->
-      <div class="mb-5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+      <div class="mb-5 p-3  bg-white/[0.03] border border-white/[0.06]">
         <div class="flex items-center gap-2 mb-1">
           <span class="text-lg">{{ data.country ? `${data.country}` : '🌍' }}</span>
           <p class="text-base font-semibold text-slate-100">{{ data.city || 'Unknown City' }}</p>

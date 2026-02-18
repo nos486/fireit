@@ -83,7 +83,7 @@ const getLatencyLabel = (ms) => {
   <DetailCard title="Latency Test" icon="⚡" :loading="false">
     <div class="space-y-1">
       <!-- Featured latency display -->
-      <div class="mb-4 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+      <div class="mb-4 p-3  bg-white/[0.03] border border-white/[0.06]">
         <div class="flex items-center justify-between mb-1">
           <p class="text-[10px] text-slate-500 uppercase tracking-widest">Round Trip</p>
           <span class="text-[10px] uppercase tracking-widest font-medium" :class="getLatencyColor(avgLatency)">
@@ -98,7 +98,7 @@ const getLatencyLabel = (ms) => {
         </div>
         <!-- Progress dots -->
         <div class="flex gap-1.5 mt-3">
-          <div v-for="i in totalPings" :key="i" class="h-1 flex-1 rounded-full transition-all duration-300"
+          <div v-for="i in totalPings" :key="i" class="h-1 flex-1  transition-all duration-300"
             :class="i <= pings.length ? getLatencyColor(pings[i-1]).replace('text-', 'bg-') + '/60' : 'bg-white/5'">
           </div>
         </div>
@@ -123,7 +123,7 @@ const getLatencyLabel = (ms) => {
       <button
         @click="runTest"
         :disabled="running"
-        class="w-full mt-3 py-2 rounded-lg text-[11px] font-medium uppercase tracking-wider border transition-all duration-200"
+        class="w-full mt-3 py-2  text-[11px] font-medium uppercase tracking-wider border transition-all duration-200"
         :class="running
           ? 'border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed'
           : 'border-orange-500/20 bg-orange-500/5 text-orange-400 hover:bg-orange-500/10 hover:border-orange-500/30'"

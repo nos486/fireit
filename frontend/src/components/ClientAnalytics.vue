@@ -28,12 +28,12 @@ onUnmounted(() => {
   <DetailCard title="Client Analytics" icon="◈" :loading="loading">
     <div class="space-y-1">
       <!-- Live clock -->
-      <div class="mb-5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
+      <div class="mb-5 p-3  bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
         <div>
           <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Local Time</p>
           <p class="text-xl font-semibold text-slate-100 font-mono tracking-tight">{{ currentTime }}</p>
         </div>
-        <div class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></div>
+        <div class="w-2 h-2  bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></div>
       </div>
 
       <div class="divide-y divide-white/[0.04]">

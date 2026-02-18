@@ -57,14 +57,14 @@ const copy = async (id, text) => {
 </script>
 
 <template>
-  <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden">
+  <div class="bg-white/[0.03] border border-white/[0.07]  overflow-hidden">
     <!-- Top accent line -->
     <div class="h-px bg-gradient-to-r from-transparent via-orange-500/40 to-transparent"></div>
 
     <div class="p-6">
       <!-- Header -->
       <div class="flex items-center gap-3 mb-6">
-        <div class="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+        <div class="w-8 h-8  bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
           <span class="text-orange-400 text-sm">$_</span>
         </div>
         <div>
@@ -78,14 +78,14 @@ const copy = async (id, text) => {
         <div
           v-for="cmd in commands"
           :key="cmd.id"
-          class="group relative bg-black/40 border border-white/[0.06] rounded-xl p-4 hover:border-orange-500/20 transition-all duration-200"
+          class="group relative bg-black/40 border border-white/[0.06]  p-4 hover:border-orange-500/20 transition-all duration-200"
         >
           <!-- Label -->
           <div class="flex items-center justify-between mb-2">
             <span class="text-[11px] font-medium text-slate-400">{{ cmd.label }}</span>
             <button
               @click="copy(cmd.id, cmd.cmd)"
-              class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border"
+              class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[10px] px-2 py-0.5 -md border"
               :class="copied === cmd.id
                 ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10'
                 : 'border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20'"
@@ -109,7 +109,7 @@ const copy = async (id, text) => {
       </div>
 
       <!-- Tip -->
-      <div class="mt-4 flex items-start gap-2 p-3 rounded-lg bg-orange-500/5 border border-orange-500/10">
+      <div class="mt-4 flex items-start gap-2 p-3  bg-orange-500/5 border border-orange-500/10">
         <span class="text-orange-400 text-sm flex-shrink-0">💡</span>
         <p class="text-[11px] text-slate-500 leading-relaxed">
           <span class="text-slate-400 font-medium">Smart detection:</span>

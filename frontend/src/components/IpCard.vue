@@ -9,13 +9,13 @@ defineProps({
 </script>
 
 <template>
-  <div class="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700">
+  <div class="bg-gray-800  p-6 shadow-lg border border-gray-700">
     <h2 class="text-xl font-bold mb-4 text-emerald-400">Your Connection</h2>
     
     <div v-if="loading" class="animate-pulse space-y-4">
-      <div class="h-8 bg-gray-700 rounded w-3/4"></div>
-      <div class="h-4 bg-gray-700 rounded w-1/2"></div>
-      <div class="h-4 bg-gray-700 rounded w-1/2"></div>
+      <div class="h-8 bg-gray-700  w-3/4"></div>
+      <div class="h-4 bg-gray-700  w-1/2"></div>
+      <div class="h-4 bg-gray-700  w-1/2"></div>
     </div>
 
     <div v-else class="space-y-3">
@@ -41,7 +41,7 @@ defineProps({
         </div>
          <div class="col-span-2">
           <span class="text-gray-400 text-sm block">User Agent</span>
-          <span class="text-sm text-gray-300 break-words font-mono bg-gray-900 p-2 rounded">{{ ipData.userAgent }}</span>
+          <span class="text-sm text-gray-300 break-words font-mono bg-gray-900 p-2 ">{{ ipData.userAgent }}</span>
         </div>
       </div>
     </div>

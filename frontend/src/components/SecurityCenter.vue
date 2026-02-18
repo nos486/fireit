@@ -20,7 +20,7 @@ const getThreatLevel = (score) => {
   <DetailCard title="Security" icon="🛡" :loading="loading">
     <div class="space-y-1">
       <!-- Threat Score - Featured -->
-      <div class="mb-4 p-3 rounded-xl border" :class="{
+      <div class="mb-4 p-3  border" :class="{
         'bg-emerald-500/5 border-emerald-500/20': getThreatLevel(data.threatScore).color === 'emerald',
         'bg-lime-500/5 border-lime-500/20': getThreatLevel(data.threatScore).color === 'lime',
         'bg-amber-500/5 border-amber-500/20': getThreatLevel(data.threatScore).color === 'amber',
@@ -53,7 +53,7 @@ const getThreatLevel = (score) => {
       <div class="divide-y divide-white/[0.04]">
         <div class="flex justify-between items-center py-2.5">
           <span class="text-[11px] text-slate-500 uppercase tracking-wider">TLS Version</span>
-          <span class="text-[12px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">{{ data.tlsVersion || '—' }}</span>
+          <span class="text-[12px] px-2 py-0.5  bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">{{ data.tlsVersion || '—' }}</span>
         </div>
         <div class="flex justify-between items-center py-2.5">
           <span class="text-[11px] text-slate-500 uppercase tracking-wider">TLS Cipher</span>
@@ -61,7 +61,7 @@ const getThreatLevel = (score) => {
         </div>
         <div class="flex justify-between items-center py-2.5">
           <span class="text-[11px] text-slate-500 uppercase tracking-wider">Protocol</span>
-          <span class="text-[12px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">{{ data.httpProtocol || '—' }}</span>
+          <span class="text-[12px] px-2 py-0.5  bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">{{ data.httpProtocol || '—' }}</span>
         </div>
       </div>
     </div>
