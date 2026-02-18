@@ -75,7 +75,7 @@ const getLatencyLabel = (ms) => {
   return 'Poor'
 }
 
-onMounted(runTest)
+// onMounted(runTest) removed - user must click run manually
 </script>
 
 <template>

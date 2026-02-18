@@ -14,6 +14,7 @@ const data = ref({ network: {}, identity: {}, client: {}, headers: {} })
 const loading = ref(true)
 const error = ref(null)
 const showHelp = ref(false)
+const showLookup = ref(false)
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
 
@@ -63,6 +64,17 @@ onMounted(fetchData)
 
         <!-- Right buttons -->
         <div class="flex items-center gap-2">
+          <!-- IP Lookup Button -->
+          <button
+            @click="showLookup = true"
+            class="flex items-center justify-center w-9 h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/30 transition-all duration-200 text-slate-400 hover:text-orange-400"
+            title="IP Lookup"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+
           <!-- Refresh button -->
           <button
             @click="fetchData"
@@ -126,13 +138,10 @@ onMounted(fetchData)
         <HeadersInspector :data="data.headers" :loading="loading" />
       </div>
 
-      <!-- IP Lookup -->
-      <IPLookup :apiUrl="API_URL" />
-
       <!-- Footer -->
       <div class="flex items-center justify-between pt-2 pb-4">
-        <p class="text-[11px] text-slate-600">FireIT — Network Intelligence Platform</p>
-        <p class="text-[11px] text-slate-600">Powered by Cloudflare Workers</p>
+        <p class="text-[11px] text-slate-600">FireIT — <a href="https://github.com/nos486/fireit" target="_blank" class="hover:text-orange-500 transition-colors">Open Source</a> Network Intelligence Platform</p>
+        <p class="text-[11px] text-slate-600">Built with Vue 3 & Cloudflare</p>
       </div>
 
     </main>
@@ -152,6 +161,25 @@ onMounted(fetchData)
           </button>
 
           <TerminalHelp :apiUrl="API_URL" />
+        </div>
+      </div>
+    </Transition>
+
+    <!-- IP Lookup Modal Overlay -->
+    <Transition name="fade">
+      <div v-if="showLookup" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#050608]/80 backdrop-blur-sm" @click.self="showLookup = false">
+        <div class="relative w-full max-w-2xl transform transition-all shadow-2xl">
+          <!-- Close Button -->
+          <button
+            @click="showLookup = false"
+            class="absolute top-4 right-4 z-[110] p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <IPLookup :apiUrl="API_URL" />
         </div>
       </div>
     </Transition>
