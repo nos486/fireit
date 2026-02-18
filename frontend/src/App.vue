@@ -7,7 +7,7 @@ import GeoMap from './components/GeoMap.vue'
 import TerminalHelp from './components/TerminalHelp.vue'
 import HeadersInspector from './components/HeadersInspector.vue'
 import LatencyTest from './components/LatencyTest.vue'
-import WebRTCLeak from './components/WebRTCLeak.vue'
+import PrivacyLeaks from './components/PrivacyLeaks.vue'
 import IPLookup from './components/IPLookup.vue'
 
 const data = ref({ network: {}, identity: {}, client: {}, headers: {} })
@@ -134,7 +134,7 @@ onMounted(fetchData)
       <!-- Row 2: Analysis (3 cards) -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <LatencyTest :apiUrl="API_URL" />
-        <WebRTCLeak :serverIp="data.network.ip" />
+        <PrivacyLeaks :serverIp="data.network.ip" />
         <HeadersInspector :data="data.headers" :loading="loading" />
       </div>
 

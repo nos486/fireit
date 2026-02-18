@@ -13,7 +13,7 @@ const maxLatency = ref(null)
 const jitter = ref(null)
 const running = ref(false)
 const pings = ref([])
-const totalPings = 5
+const totalPings = 3
 
 const ping = async () => {
   const start = performance.now()

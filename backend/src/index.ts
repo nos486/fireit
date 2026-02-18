@@ -99,8 +99,17 @@ app.get('/', (c) => {
     return c.text('🔥 FireIT API — try: curl https://fireit.pages.dev/api/ip')
 })
 
-// Ping endpoint for latency measurement
-app.get('/api/ping', (c) => {
+// Ping endpoint for latency measurement - also handle logging here
+app.get('/api/ping', async (c) => {
+    const d = buildData(c)
+    // Log to D1 only when user pings
+    try {
+        await c.env.DB.prepare(
+            'INSERT INTO access_logs (ip, country, user_agent) VALUES (?, ?, ?)'
+        ).bind(d.ip, d.country, d.userAgentString).run()
+    } catch (e) {
+        console.error('Failed to log to D1:', e)
+    }
     return c.json({ pong: true, timestamp: Date.now() })
 })
 
@@ -144,15 +153,6 @@ app.get('/api/lookup', async (c) => {
 // JSON endpoint — also auto-detects curl and returns plain text
 app.get('/api/ip', async (c) => {
     const d = buildData(c)
-
-    // Log to D1
-    try {
-        await c.env.DB.prepare(
-            'INSERT INTO access_logs (ip, country, user_agent) VALUES (?, ?, ?)'
-        ).bind(d.ip, d.country, d.userAgentString).run()
-    } catch (e) {
-        console.error('Failed to log to D1:', e)
-    }
 
     // If request comes from curl/wget/httpie → return pretty plain text
     const ua = c.req.header('user-agent') || ''
