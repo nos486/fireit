@@ -19,7 +19,10 @@ const ping = async (log = false) => {
   const start = performance.now()
   try {
     const url = log ? `${props.apiUrl}/api/ping?log=true` : `${props.apiUrl}/api/ping`
-    await fetch(url, { cache: 'no-store' })
+    await fetch(url, { 
+      cache: 'no-store',
+      headers: { 'X-FireIT-Source': 'web' }
+    })
     const end = performance.now()
     return Math.round(end - start)
   } catch {

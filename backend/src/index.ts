@@ -10,6 +10,32 @@ const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('/*', cors())
 
+// Bot Protection Middleware
+app.use('*', async (c, next) => {
+    const ua = c.req.header('user-agent') || ''
+    const path = c.req.path
+
+    // 1. Block known bad bots & scrapers
+    // Exclude 'curl', 'wget', 'httpie' from this list to allow CLI usage of /api/ip
+    const botRegex = /(bingbot|yandex|baidu|ahrefs|semrush|dotbot|mj12bot|petalbot|bytespider|python|scrapy|go-http|java|httpclient|hydra)/i
+
+    if (botRegex.test(ua)) {
+        return c.text('🤖 FireIT Protection: Access Denied for automated scripts.', 403)
+    }
+
+    // 2. Strict Header Check for Expensive/Protected Endpoints
+    // We only want the official frontend app to use these
+    const protectedPaths = ['/api/lookup', '/api/ping']
+    if (protectedPaths.some(p => path.startsWith(p))) {
+        const sourceHeader = c.req.header('X-FireIT-Source')
+        if (sourceHeader !== 'web') {
+            return c.json({ error: '⛔ Access Restricted: Official FireIT Client Required.' }, 403)
+        }
+    }
+
+    await next()
+})
+
 // Helper: build the data object for the connecting client
 function buildData(c: any) {
     const ip = c.req.header('cf-connecting-ip') || 'Unknown'

@@ -24,7 +24,9 @@ const handleNavbarSearch = async () => {
   
   searching.value = true
   try {
-    const res = await fetch(`${API_URL}/api/lookup?ip=${encodeURIComponent(ip)}`)
+    const res = await fetch(`${API_URL}/api/lookup?ip=${encodeURIComponent(ip)}`, {
+      headers: { 'X-FireIT-Source': 'web' }
+    })
     const data = await res.json()
     navbarLookupResult.value = data
     showLookup.value = true

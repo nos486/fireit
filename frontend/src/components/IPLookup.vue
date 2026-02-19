@@ -29,7 +29,9 @@ const lookup = async () => {
   result.value = null
 
   try {
-    const res = await fetch(`${props.apiUrl}/api/lookup?ip=${encodeURIComponent(ip)}`)
+    const res = await fetch(`${props.apiUrl}/api/lookup?ip=${encodeURIComponent(ip)}`, {
+      headers: { 'X-FireIT-Source': 'web' }
+    })
     const data = await res.json()
     if (data.error) {
       error.value = data.error
