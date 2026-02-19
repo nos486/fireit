@@ -33,35 +33,29 @@ app.use('*', async (c, next) => {
         }
     }
 
-    // 3. Rate Limiting Middleware (60 req/min)
-    const ip = c.req.header('cf-connecting-ip') || 'unknown'
+    // 3. Rate Limiting (D1-backed)
+    // Limit: 60 requests per minute per IP
+    const ip = c.req.header('cf-connecting-ip') || '0.0.0.0'
+    const now = Math.floor(Date.now() / 1000)
+    const windowSize = 60
+    const limit = 60
 
-    // Skip rate limiting for 'unknown' IPs (local dev) or if you want to be strict, limit them too.
-    // We'll limit them.
-    if (ip) {
-        const now = Math.floor(Date.now() / 1000)
-        const limit = 60 // requests per minute
-        const window = 60 // seconds
+    try {
+        const record = await c.env.DB.prepare('SELECT * FROM rate_limits WHERE ip = ?').bind(ip).first() as any
 
-        try {
-            // Check existing record
-            const record = await c.env.DB.prepare('SELECT * FROM rate_limits WHERE ip = ?').bind(ip).first()
-
-            if (record && (record.expires_at as number) > now) {
-                // Window is active
-                if ((record.count as number) >= limit) {
-                    return c.text('⛔ 429 Too Many Requests: You are being rate limited.', 429)
-                }
-                // Increment count
-                await c.env.DB.prepare('UPDATE rate_limits SET count = count + 1 WHERE ip = ?').bind(ip).run()
-            } else {
-                // New window (insert or reset)
-                await c.env.DB.prepare('INSERT OR REPLACE INTO rate_limits (ip, count, expires_at) VALUES (?, 1, ?)').bind(ip, now + window).run()
+        if (record && record.expires_at > now) {
+            if (record.count >= limit) {
+                return c.text('⛔ 429 Too Many Requests. Please wait a moment.', 429)
             }
-        } catch (e) {
-            // Fail open: If D1 is down, allow traffic rather than blocking everyone
-            console.error('Rate Limit DB Error:', e)
+            // Increment
+            await c.env.DB.prepare('UPDATE rate_limits SET count = count + 1 WHERE ip = ?').bind(ip).run()
+        } else {
+            // New window or expired
+            await c.env.DB.prepare('INSERT OR REPLACE INTO rate_limits (ip, count, expires_at) VALUES (?, 1, ?)').bind(ip, now + windowSize).run()
         }
+    } catch (e) {
+        console.error('Rate limit fail:', e)
+        // Fail open to avoid blocking legitimate users if DB hiccups
     }
 
     await next()
