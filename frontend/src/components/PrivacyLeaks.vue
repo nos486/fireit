@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import DetailCard from './DetailCard.vue'
 
 const props = defineProps({
@@ -10,9 +10,10 @@ const localIps = ref([])
 const dnsIps = ref([])
 const webrtcLeakDetected = ref(false)
 const dnsLeakDetected = ref(false)
-const checkingWebRTC = ref(true)
-const checkingDNS = ref(true)
+const checkingWebRTC = ref(false)
+const checkingDNS = ref(false)
 const supported = ref(true)
+const hasRun = ref(false)
 
 const checkWebRTC = async () => {
   checkingWebRTC.value = true
@@ -86,16 +87,36 @@ const checkDNS = async () => {
 }
 
 const runAllTests = () => {
+  hasRun.value = true
   checkWebRTC()
   checkDNS()
 }
-
-onMounted(runAllTests)
 </script>
 
 <template>
   <DetailCard title="Privacy Leaks" icon='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>' :loading="false">
     <div class="flex flex-col h-full space-y-6">
+      <!-- Idle state : user hasn't run yet -->
+      <div v-if="!hasRun" class="flex-1 flex flex-col items-center justify-center text-center gap-4 py-6">
+        <div class="w-12 h-12 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+          <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-300 mb-1">Privacy Scan Ready</p>
+          <p class="text-[11px] text-slate-600 leading-relaxed max-w-[200px] mx-auto">Check for WebRTC & DNS leaks that could expose your real identity.</p>
+        </div>
+        <button
+          @click="runAllTests"
+          class="px-5 py-2.5 rounded-full bg-orange-500 text-white text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-orange-600 shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_24px_rgba(249,115,22,0.4)] transition-all duration-200"
+        >
+          Run Scan
+        </button>
+      </div>
+
+      <!-- Results : after user runs the scan -->
+      <template v-else>
       <!-- WebRTC Section -->
       <div class="group/leak relative p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] transition-all duration-300">
         <div class="flex items-center justify-between mb-3 border-b border-white/[0.05] pb-2">
@@ -162,6 +183,7 @@ onMounted(runAllTests)
       >
         Re-Scan Privacy Leaks
       </button>
+      </template>
     </div>
   </DetailCard>
 </template>

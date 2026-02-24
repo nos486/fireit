@@ -6,10 +6,3 @@ CREATE TABLE access_logs (
   user_agent TEXT,
   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
-DROP TABLE IF EXISTS rate_limits;
-CREATE TABLE rate_limits (
-  ip TEXT PRIMARY KEY,
-  count INTEGER DEFAULT 1,
-  expires_at INTEGER
-);

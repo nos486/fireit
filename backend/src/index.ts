@@ -1,6 +1,37 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { UAParser } from 'ua-parser-js'
+
+// Lightweight UA parser — no heavy library needed
+function parseUA(ua: string) {
+    const browser =
+        /Edg[\/](\S+)/.exec(ua) ? { name: 'Edge', version: /Edg[\/]([\d.]+)/.exec(ua)?.[1] } :
+            /OPR[\/](\S+)/.exec(ua) ? { name: 'Opera', version: /OPR[\/]([\d.]+)/.exec(ua)?.[1] } :
+                /Chrome[\/](\S+)/.exec(ua) ? { name: 'Chrome', version: /Chrome[\/]([\d.]+)/.exec(ua)?.[1] } :
+                    /Firefox[\/](\S+)/.exec(ua) ? { name: 'Firefox', version: /Firefox[\/]([\d.]+)/.exec(ua)?.[1] } :
+                        /Safari[\/](\S+)/.exec(ua) && /Version[\/](\S+)/.exec(ua) ? { name: 'Safari', version: /Version[\/]([\d.]+)/.exec(ua)?.[1] } :
+                            { name: 'Unknown', version: '' }
+
+    const os =
+        /Windows NT ([\d.]+)/.exec(ua) ? { name: 'Windows', version: /Windows NT ([\d.]+)/.exec(ua)?.[1] } :
+            /Mac OS X ([\d_]+)/.exec(ua) ? { name: 'macOS', version: (/Mac OS X ([\d_]+)/.exec(ua)?.[1] || '').replace(/_/g, '.') } :
+                /Android ([\d.]+)/.exec(ua) ? { name: 'Android', version: /Android ([\d.]+)/.exec(ua)?.[1] } :
+                    /iPhone OS ([\d_]+)/.exec(ua) ? { name: 'iOS', version: (/iPhone OS ([\d_]+)/.exec(ua)?.[1] || '').replace(/_/g, '.') } :
+                        /Linux/.exec(ua) ? { name: 'Linux', version: '' } :
+                            { name: 'Unknown', version: '' }
+
+    const device = /Mobile|Android|iPhone|iPad/.test(ua) ? 'Mobile' : 'Desktop'
+    const engine =
+        /Gecko\//.test(ua) && /Firefox/.test(ua) ? 'Gecko' :
+            /AppleWebKit/.test(ua) ? 'Blink' :
+                'Unknown'
+
+    return {
+        browser: { name: browser.name, version: browser.version || '' },
+        os: { name: os.name, version: os.version || '' },
+        engine: { name: engine },
+        device: { type: device }
+    }
+}
 
 type Bindings = {
     DB: D1Database
@@ -33,31 +64,6 @@ app.use('*', async (c, next) => {
         }
     }
 
-    // 3. Rate Limiting (D1-backed)
-    // Limit: 60 requests per minute per IP
-    const ip = c.req.header('cf-connecting-ip') || '0.0.0.0'
-    const now = Math.floor(Date.now() / 1000)
-    const windowSize = 60
-    const limit = 60
-
-    try {
-        const record = await c.env.DB.prepare('SELECT * FROM rate_limits WHERE ip = ?').bind(ip).first() as any
-
-        if (record && record.expires_at > now) {
-            if (record.count >= limit) {
-                return c.text('⛔ 429 Too Many Requests. Please wait a moment.', 429)
-            }
-            // Increment
-            await c.env.DB.prepare('UPDATE rate_limits SET count = count + 1 WHERE ip = ?').bind(ip).run()
-        } else {
-            // New window or expired
-            await c.env.DB.prepare('INSERT OR REPLACE INTO rate_limits (ip, count, expires_at) VALUES (?, 1, ?)').bind(ip, now + windowSize).run()
-        }
-    } catch (e) {
-        console.error('Rate limit fail:', e)
-        // Fail open to avoid blocking legitimate users if DB hiccups
-    }
-
     await next()
 })
 
@@ -66,23 +72,8 @@ function buildData(c: any) {
     const ip = c.req.header('cf-connecting-ip') || 'Unknown'
     const country = c.req.header('cf-ipcountry') || 'Unknown'
     const userAgentString = c.req.header('user-agent') || 'Unknown'
-    const parser = new UAParser(userAgentString)
-    const ua = parser.getResult()
+    const ua = parseUA(userAgentString)
     const cf = (c.req.raw as any).cf || {}
-
-    // Collect interesting request headers
-    const headerNames = [
-        'accept-language', 'accept-encoding', 'accept',
-        'dnt', 'sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform',
-        'sec-fetch-dest', 'sec-fetch-mode', 'sec-fetch-site',
-        'upgrade-insecure-requests', 'cache-control', 'pragma',
-        'connection', 'x-forwarded-for', 'x-real-ip'
-    ]
-    const headers: Record<string, string> = {}
-    for (const name of headerNames) {
-        const val = c.req.header(name)
-        if (val) headers[name] = val
-    }
 
     return {
         ip,
@@ -111,7 +102,6 @@ function buildData(c: any) {
             device: ua.device.type || 'Desktop',
             userAgent: userAgentString,
         },
-        headers,
     }
 }
 
@@ -217,7 +207,6 @@ app.get('/api/ip', async (c) => {
         network: d.network,
         identity: d.identity,
         client: d.client,
-        headers: d.headers,
     })
 })
 
@@ -234,7 +223,6 @@ app.get('/api/ip.json', async (c) => {
         network: d.network,
         identity: d.identity,
         client: d.client,
-        headers: d.headers,
     })
 })
 
